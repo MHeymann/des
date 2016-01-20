@@ -1,5 +1,5 @@
 #OBJS specifies which files to compile as part of the project
-OBJS = keys.c
+OBJS = keys.o	testkeys.c
 
 #CC specifies which compiler we're using
 CC = gcc
@@ -15,11 +15,13 @@ DFLAGS			= -DDEBUGFLAG
 #LINKER_FLAGS specifies the libraries we're linking against
 
 #OBJ_NAME specifies the name of our exectuable
-OBJ_NAME = keys
+OBJ_NAME = testkeys
 
 #This is the target that compiles our executable
-all : $(OBJS)
+all: $(OBJS)
 	$(CC) $(OBJS) $(COMPILER_FLAGS) $(DFLAGS) $(LINKER_FLAGS) -o $(OBJ_NAME)
+
+keys.o: keys.c
 
 clean: 
 	$(RM) *.o $(OBJ_NAME)

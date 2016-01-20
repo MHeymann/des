@@ -3,8 +3,8 @@
 #include "keys.h"
 
 /*** static variables *********************************************************/
-static unsigned char bitmasks[] = {
-	'\0',
+static unsigned long bitmasks[] = {
+	0,
 	BIT1,
 	BIT2,
 	BIT3, 
@@ -12,7 +12,43 @@ static unsigned char bitmasks[] = {
 	BIT5,
 	BIT6, 
 	BIT7,
-	BIT8
+	BIT8,
+	BIT9,
+	BIT10,
+	BIT11,
+	BIT12,
+	BIT13, 
+	BIT14,
+	BIT15,
+	BIT16, 
+	BIT17,
+	BIT18,
+	BIT19,
+	BIT20,
+	BIT21,
+	BIT22,
+	BIT23, 
+	BIT24,
+	BIT25,
+	BIT26, 
+	BIT27,
+	BIT28,
+	BIT29,
+	BIT30,
+	BIT31,
+	BIT32
+};
+
+static unsigned char char_bitmasks[] = {
+	'\0',
+	CHAR_BIT1,
+	CHAR_BIT2,
+	CHAR_BIT3,
+	CHAR_BIT4,
+	CHAR_BIT5,
+	CHAR_BIT6,
+	CHAR_BIT7,
+	CHAR_BIT8
 };
 
 static int PC_1[] = {
@@ -57,17 +93,22 @@ static int left_shifts[] = {
 };
 
 /*** helper function prototypes ***********************************************/
-void get_bitvals(void *key, char *bits);
-void set_bitvals(char *bits, unsigned char *subkey);
+void permutate1(unsigned long *C, unsigned long *D, unsigned long *halves);
+void perm1_bitplace(int check_bit, int set_bit, unsigned long *A, unsigned long left, unsigned long right);
+void permutate2(void **subkeys, int subkey_i, unsigned long *C, unsigned long *D);
+void get_bitvals(void *key, unsigned long *halves);
 unsigned long rotate(unsigned long L, int shifts);
-int check_bit(long number, int bit_no);
-void set_subkey_bit(char *bits, int i, long A, int pc_i);
+int check_bit(unsigned long number, int bit_no);
+void set_subkey_bit(unsigned char *subkey, int bytenumber, int bitnumber, unsigned long A, int check_bit_no);
 
 /*** functions ****************************************************************/
+/**
+ * Allocate enough memory to hold 16 subkeys of 6 bytes each
+ */
 void **alloc_subkeys()
 {
-	int i;
-	void **subkeys = NULL;
+	int i, j;
+	char **subkeys = NULL;
 	subkeys = malloc(sizeof(void *) * 16);
 	if (!subkeys) {
 		fprintf(stderr, "Memory error allocating subkeys! \n");
@@ -79,18 +120,23 @@ void **alloc_subkeys()
 	}
 
 	for (i = 0; i < 16; i++) {
-		subkeys[i] = malloc(6);
+		subkeys[i] = malloc(6 * sizeof(char));
 		if (!subkeys[i]) {
 			fprintf(stderr, "Memory error allocating subkeys in array! \n");
-			free_subkeys(subkeys);
+			free_subkeys((void **)subkeys);
 			return NULL;
+		}
+		for (j = 0; j < 6; j++) {
+			subkeys[i][j] = '\0';
 		}
 	}
 
-	return subkeys;
+	return (void **)subkeys;
 }
 
-
+/**
+ * Free subkeys allocated with alloc_subkey.
+ */
 void free_subkeys(void **subkeys)
 {
 	int i;
@@ -106,135 +152,67 @@ void free_subkeys(void **subkeys)
 	free(subkeys);
 }
 
-
+/**
+ * Generate 16 subkeys from the supplied key.
+ */
 void get_subkeys(void *key, void **subkeys)
 {
-	char bits[64]; 
-	int i, j, pc_i;
+	unsigned long halves[2]; 
+	int i, pc_i;
 	unsigned long C[17], D[17];
-	unsigned char perm_key[56];
 
-	get_bitvals(key, bits);
+	halves[0] = 0;
+	halves[1] = 0;
 
-	for (i = 0; i < 56; i++) {
-		perm_key[i] = bits[PC_1[i] - 1];
+	/* 
+	 * Put the left and right halves' bits into dedicated variable spaces.
+	 * This is to ensure that all systems will store all the bits without
+	 * overflow.  
+	 */
+	get_bitvals(key, halves);
+
+	/* initialise C and D arrays to 0 */
+	for (i = 0; i < 17; i++) {
+		C[i] = 0;
+		D[i] = 0;
 	}
+
+	/* Permutate the bits and split into a left and a right half. */
+	permutate1(C, D, halves);
 	
-	C[0] = 0;
-	D[0] = 0;
-	for (i = 0; i < 28; i++) {
-		C[0] <<= 1;
-		D[0] <<= 1;
-		C[0] += perm_key[i];
-		D[0] += perm_key[28 + i];
-	}
-
+	/* 
+	 * Get the next value of C and D by rotating to the left 
+	 * the given value by the amount of bits specified by 
+	 * the static array left_shifts.
+	 */
 	for (i = 1; i < 17; i++) {
 		C[i] = rotate(C[i - 1], left_shifts[i - 1]);
 		D[i] = rotate(D[i - 1], left_shifts[i - 1]);
 	}
 
-	for (i = 1; i < 17; i++) {
-		for (j = 0; j < 48; j++) {
-			pc_i = PC_2[j];
-			if (pc_i <= 28) {
-				set_subkey_bit(bits, j, C[i], pc_i);
-			} else {
-				pc_i -= 28;
-				set_subkey_bit(bits, j, D[i], pc_i);
-			}
-		}
-
-		set_bitvals(bits, (unsigned char *)subkeys[i - 1]);			
-	}
-
-}
-
-/*** helper functions *********************************************************/
-void set_subkey_bit(char *bits, int i, long A, int pc_i)
-{
-	if (check_bit(A, pc_i)) {
-		bits[i] = 1;
-	} else {
-		bits[i] = 0;
+	/*
+	 * For each of the values of C and D, permutate according to
+	 * the static array PC_2.  Store the values in subkeys.  
+	 */
+	for (i = 1; i < 17; i++) {	
+		permutate2(subkeys, i, C, D);
 	}
 }
 
 
-int check_bit(long number, int bit_no) 
-{
-	return ((number >> (28 - bit_no)) & BIT1);
-}
-
-void set_bitvals(char *bits, unsigned char *subkey) 
+/**
+ * Print the bits of each of the subkeys. 
+ */
+void print_subkeys(void **subkeys)
 {
 	int i, j, k;
-	unsigned char c = 0;
-	for (i = 0; i < 6; i++) {
-		c = 0;
-		for (j = 0; j < 8; j++) {
-			k = i * 8 + j;
-			c <<= 1;
-			if (bits[k]) {
-				c += 1;
-			} 
-		}
-		subkey[i] = c;
-	}
-}
-
-
-void get_bitvals(void *key, char *bits)
-{
-	unsigned char *ckey = (unsigned char *)key;
-	int i, j, bitno;
-
-	for (i = 0; i < 8; i++) {
-		for (j = 0; j < 8; j++) {
-			bitno = 8 - j;
-			if (bitmasks[bitno] & ckey[i]) {
-				bits[8 * i + j] = 1;
-			} else {
-				bits[8 * i + j] = 0;
-			}
-		}
-	}
-}
-
-
-unsigned long rotate(unsigned long L, int shifts)
-{
-	int i;
-	unsigned long rightmost = 0;
-
-	rightmost = L >> (28 - shifts);
-	
-	for (i = 0; i < shifts; i++) {
-		L <<= 1;
-		if (L & BIT29) {
-			L ^= BIT29;
-		}
-	}
-	L |= rightmost;
-
-	return L;
-}
-
-/*** main routine *************************************************************/
-int main(int argc, char *arv[]) {
-	unsigned long long testkey = 17428856458888819731;
-	void **subkeys = alloc_subkeys(); 
-	int i, j, k;
-	unsigned char *c;
-
-	get_subkeys(&testkey, subkeys);
-
+	unsigned char *cp;
 	for (i = 0; i < 16; i++) {
 		printf("K%d:\t", i + 1);
-		c = (unsigned char *) subkeys[i];
+		cp = (unsigned char *) subkeys[i];
 		for (j = 0; j < 6; j++) {
 			for (k = 0; k < 8; k++) {
-				if (c[j] & (bitmasks[8 - k])) {
+				if (cp[j] & (char_bitmasks[k + 1])) {
 					printf("1");
 				} else {
 					printf("0");
@@ -243,8 +221,111 @@ int main(int argc, char *arv[]) {
 		}
 		printf("\n");
 	}
-
-	free_subkeys(subkeys);
-
-	return 0;
 }
+
+
+/*** helper functions *********************************************************/
+/**
+ * Permutate the bits, found in the appropriate two halves, according to
+ * the order specified by the static array PC_1.  The result is split into
+ * left and right halves.  
+ */
+void permutate1(unsigned long *C, unsigned long *D, unsigned long *halves)
+{
+	int set_bit, check_bit;
+	for (set_bit = 1; set_bit <= 28; set_bit++) {
+		check_bit = PC_1[set_bit - 1];
+		perm1_bitplace(check_bit, set_bit, C, halves[0], halves[1]);
+		check_bit = PC_1[28 + set_bit - 1];
+		perm1_bitplace(check_bit, set_bit, D, halves[0], halves[1]);
+	}
+}
+
+/**
+ * Check bit check_bit in either the left or right half of the key, and place
+ * into the unsigned long pointed to by A at position setbit.  
+ */
+void perm1_bitplace(int check_bit, int set_bit, unsigned long *A, unsigned long left, unsigned long right)
+{
+	unsigned long *half_pt;
+	if (check_bit > 32) {
+		half_pt = &right;
+		check_bit -= 32;
+	} else {
+		half_pt = &left;
+	}
+	if (bitmasks[check_bit] & (*half_pt)) {
+		*A ^= bitmasks[set_bit];
+	}
+}
+
+/**
+ * Permutate the bits in C and D based on the values in PC_2 and place into 
+ * the array of subkeys.
+ */
+void permutate2(void **subkeys, int subkey_i, unsigned long *C, unsigned long *D)
+{
+	int j, k, check_bit_no;
+	for (j = 0; j < 6; j++) {
+		for (k = 0; k < 8; k++) {
+			check_bit_no = PC_2[j * 8 + k];
+			if (check_bit_no <= 28) {
+				set_subkey_bit((unsigned char *)subkeys[subkey_i - 1], j, k + 1, C[subkey_i], check_bit_no);
+			} else {
+				check_bit_no -= 28;
+				set_subkey_bit((unsigned char *)subkeys[subkey_i - 1], j, k + 1, D[subkey_i], check_bit_no);
+			}
+		}
+	}
+}
+
+/**
+ * Set the value of check_bit_no to the the appropriate position in the memory
+ * space pointed to by subkey. 
+ */
+void set_subkey_bit(unsigned char *subkey, int bytenumber, int bitnumber, unsigned long A, int check_bit_no)
+{
+	if(A & bitmasks[check_bit_no]) {
+		subkey[bytenumber] ^= char_bitmasks[bitnumber];
+	}
+}
+
+/**
+ * Take the pointer to the key supplied and use it to place its bits into memory
+ * space dedicated to hold the two halves of the key.  
+ */
+void get_bitvals(void *key, unsigned long *halves)
+{
+	unsigned char *ckey = (unsigned char *)key;
+	int i, j;
+
+	for (i = 0; i < 4; i++) {
+		for (j = 0; j < 8; j++) {
+			if (char_bitmasks[j + 1] & ckey[i]) {
+				halves[0] ^= bitmasks[i * 8 + j + 1];
+			}
+			if (char_bitmasks[j + 1] & ckey[i + 4]) {
+				halves[1] ^= bitmasks[i * 8 + j + 1];
+			}
+		}
+	}
+}
+
+/**
+ * rotate bits 1 to 28 to the left by the amount of bits indicated by shifts.  
+ */
+unsigned long rotate(unsigned long L, int shifts)
+{
+	int i;
+
+	for (i = 0; i < shifts; i++) {
+		if (L & BIT1) {
+			L ^= BIT29;
+			L ^= BIT1;
+		}
+		L <<= 1;
+	}
+
+	return L;
+}
+
