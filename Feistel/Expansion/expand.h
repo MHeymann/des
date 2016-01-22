@@ -35,7 +35,20 @@
 #define BIT31	2
 #define BIT32	1
 
+#define CHAR_BIT1	128
+#define CHAR_BIT2	64
+#define CHAR_BIT3	32
+#define CHAR_BIT4	16
+#define CHAR_BIT5	8
+#define CHAR_BIT6	4
+#define CHAR_BIT7	2
+#define CHAR_BIT8	1
+
 /*** Function Prototypes ******************************************************/
-void expand(unsigned long *data_bits, unsigned long *expanded_bits);
+void expand(void *data32, unsigned long *expanded_bits);
+unsigned long *alloc_expand_space();
+void free_expanded_space(unsigned long *space);
+void print_expanded_bits(unsigned long *data);
+void print_original_bits(void *data32);
 
 #endif
