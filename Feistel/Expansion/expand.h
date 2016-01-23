@@ -45,10 +45,29 @@
 #define CHAR_BIT8	1
 
 /*** Function Prototypes ******************************************************/
+/**
+ * Expand the 32 bits of data into 48 bits.
+ */
 void expand(void *data32, unsigned long *expanded_bits);
+
+/**
+ * Allocate space into which to put the databits.
+ */
 unsigned long *alloc_expand_space();
+
+/**
+ * Free the space allocated for expanding bits.
+ */
 void free_expanded_space(unsigned long *space);
-void print_expanded_bits(unsigned long *data);
-void print_original_bits(void *data32);
+
+/**
+ * Print the 48 bits resulting from the expand function in this library
+ */
+void print_expanded_bits(unsigned long *data, char *string);
+
+/**
+ * Print the bits of the 32 bit data piece.
+ */
+void print_original_bits(void *data32, char *string);
 
 #endif
