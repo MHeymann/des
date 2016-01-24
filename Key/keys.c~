@@ -99,7 +99,7 @@ void permutate2(void **subkeys, int subkey_i, unsigned long *C, unsigned long *D
 void get_bitvals(void *key, unsigned long *halves);
 unsigned long rotate(unsigned long L, int shifts);
 int check_bit(unsigned long number, int bit_no);
-void set_subkey_bit(unsigned long *subkey, int side, int bitnumber, unsigned long A, int check_bit_no);
+void set_subkey_bit(unsigned long *subkey, int bytenumber, int bitnumber, unsigned long A, int check_bit_no);
 
 /*** functions ****************************************************************/
 /**
@@ -109,7 +109,7 @@ void **alloc_subkeys()
 {
 	int i, j;
 	unsigned long **subkeys = NULL;
-	subkeys = malloc(sizeof(unsigned long *) * 16);
+	subkeys = malloc(sizeof(void *) * 16);
 	if (!subkeys) {
 		fprintf(stderr, "Memory error allocating subkeys! \n");
 		return NULL;
@@ -208,8 +208,6 @@ void print_subkeys(void **subkeys)
 	int i, j, k;
 	unsigned long *ulp;
 	for (i = 0; i < 16; i++) {
-		print_subkey(subkeys, i, NULL);
-		/*
 		printf("K%d:\t", i + 1);
 		ulp = (unsigned long *) subkeys[i];
 		for (j = 0; j < 2; j++) {
@@ -222,42 +220,9 @@ void print_subkeys(void **subkeys)
 			}
 		}
 		printf("\n");
-		*/
 	}
 }
 
-/**
- * Print the bits of the subkey specified by i. 
- */
-void print_subkey(void **subkeys, int i, char *string)
-{
-	int j, k;
-	unsigned long *ulp;
-	printf("K%d:\t", i + 1);
-	ulp = (unsigned long *) subkeys[i];
-	for (j = 0; j < 2; j++) {
-		for (k = 0; k < 24; k++) {
-			if (ulp[j] & (bitmasks[k + 1])) {
-				printf("1");
-				if (string) {
-					string[j * 24 + k] = '1';
-				}
-			} else {
-				if (string) {
-					string[j * 24 + k] = '0';
-				}
-				printf("0");
-			}
-			if (((k + 1) % 8) == 0) {
-				printf(" ");
-			}
-		}
-	}
-	printf("\n");
-	if (string) {
-		string[48] = '\0';
-	}
-}
 
 /*** helper functions *********************************************************/
 /**
@@ -300,16 +265,15 @@ void perm1_bitplace(int check_bit, int set_bit, unsigned long *A, unsigned long 
  */
 void permutate2(void **subkeys, int subkey_i, unsigned long *C, unsigned long *D)
 {
-	int leftright, k, check_bit_no;
-	for (leftright = 0; leftright < 2; leftright++) {
-		for (k = 0; k < 24; k++) {
-			check_bit_no = PC_2[leftright * 24 + k];
+	int j, k, check_bit_no;
+	for (j = 0; j < 2; j++) {
+		for (k = 0; k < 28; k++) {
+			check_bit_no = PC_2[j * 28 + k];
 			if (check_bit_no <= 28) {
-			    /*printf("");*/
-				set_subkey_bit((unsigned long *)subkeys[subkey_i - 1], leftright, k + 1, C[subkey_i], check_bit_no);
+				set_subkey_bit((unsigned long *)subkeys[subkey_i - 1], j, k + 1, C[subkey_i], check_bit_no);
 			} else {
 				check_bit_no -= 28;
-				set_subkey_bit((unsigned long *)subkeys[subkey_i - 1], leftright, k + 1, D[subkey_i], check_bit_no);
+				set_subkey_bit((unsigned long *)subkeys[subkey_i - 1], j, k + 1, D[subkey_i], check_bit_no);
 			}
 		}
 	}
@@ -319,10 +283,10 @@ void permutate2(void **subkeys, int subkey_i, unsigned long *C, unsigned long *D
  * Set the value of check_bit_no to the the appropriate position in the memory
  * space pointed to by subkey. 
  */
-void set_subkey_bit(unsigned long *subkey, int leftright, int setbit_number, unsigned long A, int check_bit_no)
+void set_subkey_bit(unsigned long *subkey, int bytenumber, int bitnumber, unsigned long A, int check_bit_no)
 {
 	if(A & bitmasks[check_bit_no]) {
-		subkey[leftright] ^= bitmasks[setbit_number];
+		subkey[bytenumber] ^= char_bitmasks[bitnumber];
 	}
 }
 

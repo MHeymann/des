@@ -1,8 +1,7 @@
-#ifndef KEYS_H
-#define KEYS_H
+#ifndef SUBSTITUTION_H
+#define SUBSTITUTION_H
 
 /*** Macros *******************************************************************/
-
 #define BIT1	2147483648
 #define BIT2	1073741824
 #define BIT3	536870912
@@ -46,31 +45,9 @@
 #define CHAR_BIT8	1
 
 
-/*** Function Headers *********************************************************/
-
-/**
- * Generate 16 subkeys from the supplied key.
- */
-void get_subkeys(void *key, void **subkeys);
-
-/**
- * Allocate enough memory to hold 16 subkeys of 6 bytes each
- */
-void **alloc_subkeys();
-
-/**
- * Free subkeys allocated with alloc_subkey.
- */
-void free_subkeys(void **subkeys);
-
-/**
- * Print the bits of each of the subkeys. 
- */
-void print_subkeys(void **subkeys);
-
-/**
- * Print the bits of the subkey specified by i. 
- */
-void print_subkey(void **subkeys, int i, char *string);
+/*** Function Prototypes ******************************************************/
+void substitute(unsigned long *data);
+void print_raw_data(unsigned long *data);
+void print_substituted_data(unsigned long *data);
 
 #endif
