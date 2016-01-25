@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 	printf("\nparsed input:\t\t");
 	print_unsubstituted_data(data, NULL);
 
+	subd = 0;
 	substitute(data, &subd);
 
 	
