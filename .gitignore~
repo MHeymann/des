@@ -28,13 +28,7 @@
 *.i*86
 *.x86_64
 *.hex
-testexpand
-testsubstitution
 testkeys
-
-*.py~
-*.c~
-*.h~
 
 # Debug files
 *.dSYM/
