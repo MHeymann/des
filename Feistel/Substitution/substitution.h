@@ -46,8 +46,26 @@
 
 
 /*** Function Prototypes ******************************************************/
-void substitute(unsigned long *data);
-void print_raw_data(unsigned long *data);
-void print_substituted_data(unsigned long *data);
+
+/**
+ * Substitute groups of six bits with groups of four, according to 8
+ * substitution tables.  Put result into a 32 bit unsigned long called 
+ * substituted.  
+ */
+void substitute(unsigned long *data, unsigned long *substituted);
+
+/**
+ * Print the data bits before having undergone substitution.  
+ * Put the resultant string into memory pointed at by string.
+ * String may be null.  
+ */
+void print_unsubstituted_data(unsigned long *data, char *string);
+
+/**
+ * Print the data bits after having undergone substitution.  
+ * Put the resultant string into memory pointed at by string.
+ * String may be null.  
+ */
+void print_substituted_data(unsigned long *data, char *string);
 
 #endif
