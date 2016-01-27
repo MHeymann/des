@@ -1,7 +1,8 @@
-#ifndef EXPAND_H
-#define EXPAND_H
+#ifndef PERMUTE_H
+#define PERMUTE_H
 
 /*** Macros *******************************************************************/
+
 #define BIT1	2147483648
 #define BIT2	1073741824
 #define BIT3	536870912
@@ -45,29 +46,9 @@
 #define CHAR_BIT8	1
 
 /*** Function Prototypes ******************************************************/
-/**
- * Expand the 32 bits of data into 48 bits.
- */
-void expand(void *data32, unsigned long *expanded_bits);
 
-/**
- * Allocate space into which to put the databits.
- */
-unsigned long *alloc_expand_space();
-
-/**
- * Free the space allocated for expanding bits.
- */
-void free_expanded_space(unsigned long *space);
-
-/**
- * Print the 48 bits resulting from the expand function in this library
- */
-void print_expanded_bits(unsigned long *data, char *string);
-
-/**
- * Print the bits of the 32 bit data piece.
- */
-void print_original_bits(void *data32, char *string);
+void final_permutation(unsigned long *data_bits, unsigned long *permuted_bits);
+void initial_permutation(unsigned long *data_bits, unsigned long *permuted_bits);
+void print_bits_permutation(unsigned long *data, char *string);
 
 #endif

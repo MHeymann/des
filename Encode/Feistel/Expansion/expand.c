@@ -5,7 +5,6 @@
 
 /*** Local Headers ************************************************************/
 #include "expand.h"
-#include "debug.h"
 
 
 /*** Macros *******************************************************************/
@@ -88,6 +87,7 @@ static unsigned long bitmasks[] = {
 /*
  * bitmasks used to address bits in unsigned characters
  */
+/*
 static unsigned char char_bitmasks[] = {
 	'\0',
 	CHAR_BIT1,
@@ -99,6 +99,7 @@ static unsigned char char_bitmasks[] = {
 	CHAR_BIT7,
 	CHAR_BIT8
 };
+*/
 
 /*
  * Masks used to check bits for expanding the different groups of four bits
@@ -282,34 +283,30 @@ static unsigned char *lookupchars[] = {
 
 
 /*** Helper Functions Prototypes **********************************************/
-void get_data_bits(unsigned long *data_bits, void *data32);
+
 unsigned char get_char_mask(unsigned long bits_present, int char_no);
 
 
 /*** Helper function prototypes ***********************************************/
 /**
- * Expand the 32 bits of data into 48 bits.
+ * Expand the 32 data_bits into 48 bits.
  */
-void expand(void *data32, unsigned long *expanded_bits) 
+void expand(unsigned long *data_bits, unsigned long *expanded_bits) 
 {
 	int i;
-	unsigned long data_bits = 0;
 	unsigned long mask;
 	unsigned long bits_present;
 	unsigned long template;
 
-	get_data_bits(&data_bits, data32);
-
 	for (i = 0; i < 6; i++) {
-		/*mask = 0;*/
 		mask = expand_masks[i];
-		bits_present = mask & data_bits;
+		bits_present = mask & *data_bits;
 		template = get_char_mask(bits_present, i);
 		if (i < 3) {
 			template <<= ((4 - i - 1) * 8);
 			expanded_bits[0] += template;
 		} else {
-			template <<= ((4 + 3 - i - 1) * 8);
+			template <<= ((4 - (i - 3) - 1) * 8);
 			expanded_bits[1] += template;
 		}
 	}
@@ -320,7 +317,6 @@ void expand(void *data32, unsigned long *expanded_bits)
  */
 unsigned long *alloc_expand_space()
 {
-	int i;
 	unsigned long *space = NULL;
 
 	space = malloc(sizeof(unsigned long) * 2);
@@ -348,9 +344,10 @@ void print_expanded_bits(unsigned long *data, char *string)
 {
 	int i;
 	char *localstring;
+	char s[49];
 
 	if (!string) {
-		localstring = malloc(sizeof(char) * 49);
+		localstring = (char *)s;
 	} else {
 		localstring = string;
 	}
@@ -376,36 +373,32 @@ void print_expanded_bits(unsigned long *data, char *string)
 			printf(" ");
 		}
 	}
-	printf("\n");
-	if (!string) {
-		free(localstring);
-	}
+
 }
 
 /**
  * Print the bits of the 32 bit data piece.
  */
-void print_original_bits(void *data32, char *s) 
+void print_original_bits(unsigned long *data_bits, char *s) 
 {
 	int i;
 	char *string;
-	unsigned long data_bits = 0;
-	get_data_bits(&data_bits, data32);
+	char localstring[33];
 
 	if (!s) {
-		string = malloc(sizeof(char) * 33);
+		string = localstring;
 	} else {
 		string = s;
 	}
 	
 	printf(" ");
 	for (i = 0; i < 16; i++) {
-		if (bitmasks[i + 1] & data_bits) {
+		if (bitmasks[i + 1] & *data_bits) {
 			string[i] = '1';
 		} else {
 			string[i] = '0';
 		}
-		if (bitmasks[16 + i + 1] & data_bits) {
+		if (bitmasks[16 + i + 1] & *data_bits) {
 			string[i + 16] = '1';
 		} else {
 			string[i + 16] = '0';
@@ -418,10 +411,6 @@ void print_original_bits(void *data32, char *s)
 			printf("   ");
 		}
 	}
-	printf("\n");
-	if (!s) {
-		free(string);
-	}
 }
 
 
@@ -432,7 +421,6 @@ void print_original_bits(void *data32, char *s)
  */
 unsigned char get_char_mask(unsigned long bits_present, int char_no)
 {
-	int i;
 	int hi = sizes[char_no] - 1;
 	int lo = 0;
 	int mid;
@@ -459,20 +447,4 @@ unsigned char get_char_mask(unsigned long bits_present, int char_no)
 	return lookupchars[char_no][mid];
 }
 
-/**
- * Put the bits in the 32bit data piece into the rightmost bits of an
- * unsigned long. 
- */
-void get_data_bits(unsigned long *data_bits, void *data32)
-{
-	int i;
-	unsigned char *datachars = (unsigned char *)data32;
-	unsigned char c;
-	unsigned long temp;
-	for (i = 0; i < 4; i++) {
-		c = datachars[i];
-		temp = (unsigned long) c;
-		temp <<= ((3 - i) * 8);
-		*data_bits ^= temp;
-	}
-}
+

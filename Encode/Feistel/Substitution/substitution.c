@@ -21,7 +21,7 @@
  * masks four the outerbits of each respective group of four in one half
  * of the data.
  */
-static int outer_masks[] = {
+static unsigned long outer_masks[] = {
 	OUTER_MASK1, 
 	OUTER_MASK2, 
 	OUTER_MASK3, 
@@ -32,7 +32,7 @@ static int outer_masks[] = {
  * masks four the outerbits of each respective group of four in one half
  * of the data.
  */
-static int inner_masks[] = {
+static unsigned long inner_masks[] = {
 	INNER_MASK1, 
 	INNER_MASK2, 
 	INNER_MASK3, 
@@ -81,6 +81,7 @@ static unsigned long bitmasks[] = {
 /*
  * bitmasks used to address bits in unsigned characters
  */
+/*
 static unsigned char char_bitmasks[] = {
 	'\0',
 	CHAR_BIT1,
@@ -92,6 +93,7 @@ static unsigned char char_bitmasks[] = {
 	CHAR_BIT7,
 	CHAR_BIT8
 };
+*/
 
 /**
  * The substitution boxes
@@ -241,7 +243,7 @@ void print_substituted_data(unsigned long *data, char *string)
 			}
 			printf("0");
 		}
-		if (((i + 1) % 4) == 0) {
+		if ((((i + 1) % 4) == 0) && i != 31) {
 			printf("   ");
 		}
 	}

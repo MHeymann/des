@@ -28,9 +28,11 @@
 *.i*86
 *.x86_64
 *.hex
+testfeistel
 testexpand
 testsubstitution
 testkeys
+testpermute
 
 *.py~
 *.c~

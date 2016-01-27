@@ -16,24 +16,24 @@ int main(int argc, char *argv[])
 	ldata[1] = 2254776064;
 	data = (unsigned long *)&ldata;
 
-	printf("expected input:\t\t");
+	printf("\nExpected input:\t\t");
 	for (i = 0; i < 48; i++) {
 		printf("%c", input[i]);
 		if (((i + 1) % 6) == 0) {
 			printf(" ");
 		}
 	}
-	printf("\nparsed input:\t\t");
+	printf("\nParsed input:\t\t");
 	print_unsubstituted_data(data, NULL);
 
 	subd = 0;
 	substitute(data, &subd);
 
 	
-	printf("found output:\t\t");
+	printf("Found output:\t\t");
 	print_substituted_data(&subd, (char *)test_string);
 
-	printf("expected output:\t");
+	printf("Expected output:\t");
 	printf(" ");
 	for (i = 0; i < 32; i++) {
 		printf("%c", output[i]);
@@ -41,13 +41,13 @@ int main(int argc, char *argv[])
 			printf("\n\x1b[1;31mFAILED!\x1b[0m\n");
 			goto QUIT;
 		}
-		if (((i + 1) % 4) == 0) {
+		if ((((i + 1) % 4) == 0) && i != 31) {
 			printf("   ");
 		}
 	}
 	printf("\n\n");
 
-	printf("\x1b[1;34mPASSED!\x1b[0m\n");
+	printf("\x1b[1;34mPASSED!\x1b[0m\n\n");
 
 QUIT:
 	return 0;
