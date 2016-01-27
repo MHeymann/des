@@ -44,7 +44,13 @@
 #define CHAR_BIT7	2
 #define CHAR_BIT8	1
 
-
+/*** Function Prototypes ******************************************************/
+/**
+ * The feistel function, taking R as 32 bit right side of previous iteration, 
+ * expanding it and applying the XOR bitwise operation to it and the relevant 
+ * subkey, applying the S-boxes to the result and finally applying the
+ * permutation function relevant to Feiste.  The 32 bit value is returned.  
+ */
 unsigned long feistel(unsigned long *R, unsigned long *subkey);
 
 #endif

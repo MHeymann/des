@@ -60,6 +60,9 @@ static unsigned long char_bitmasks[] = {
 };
 */
 
+/* 
+ * The table defining the initital permutation. 
+ */
 unsigned int init_P[] = {
 	58,    50,   42,    34,    26,   18,    10,    2,
 	60,    52,   44,    36,    28,   20,    12,    4,
@@ -71,6 +74,9 @@ unsigned int init_P[] = {
 	63,    55,   47,    39,    31,   23,    15,    7
 };
 
+/*
+ * The table defining the final permutation. 
+ */
 unsigned int final_P[] = {
 	40, 8, 48, 16, 56, 24, 64, 32,
 	39, 7, 47, 15, 55, 23, 63, 31,
@@ -90,7 +96,9 @@ void set_bit(unsigned long *data_bits, int check_bit,
 
 
 /*** Functions ****************************************************************/
-
+/**
+ * The final permutation in the encoding process.
+ */
 void final_permutation(unsigned long *data_bits, unsigned long *permuted_bits)
 {
 	int i, j;
@@ -107,7 +115,9 @@ void final_permutation(unsigned long *data_bits, unsigned long *permuted_bits)
 	}
 }
 
-
+/**
+ * The initial permutation in the encoding process.
+ */
 void initial_permutation(unsigned long *data_bits, unsigned long *permuted_bits)
 {
 	int i, j;
@@ -124,7 +134,10 @@ void initial_permutation(unsigned long *data_bits, unsigned long *permuted_bits)
 	}
 }
 
-
+/**
+ * Print the 64 bits in data, and put the resultant characters in the
+ * memory space pointed to by string.  String may be a null pointer.
+ */
 void print_bits_permutation(unsigned long *data, char *string)
 {
 	char s[65];
@@ -159,6 +172,10 @@ void print_bits_permutation(unsigned long *data, char *string)
 
 /*** Helper functions *********************************************************/
 
+/**
+ * Check the bit at position check_bit and set it at position set_bit
+ * on side setside in permuted_bits.  
+ */
 void set_bit(unsigned long *data_bits,  int check_bit,
 		unsigned long *permuted_bits, int set_side, int set_bit)
 {

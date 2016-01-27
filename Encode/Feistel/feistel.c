@@ -5,7 +5,16 @@
 #include "Substitution/substitution.h"
 
 /*** Macros *******************************************************************/
+
+/*
+ * No new macros required
+ */
+
 /*** Static Global Variables **************************************************/
+
+/*
+ * The table defining the feistel permutation
+ */
 static int feistel_IP[] = {
 	16,   7,  20,  21,
 	29,  12,  28,  17,
@@ -17,6 +26,9 @@ static int feistel_IP[] = {
 	22,  11,   4,  25
 };
 
+/*
+ * Bitmasks for addressing individual bits through bitwise operations.
+ */
 static unsigned long bitmasks[] = {
 	0,
 	BIT1,
@@ -55,23 +67,31 @@ static unsigned long bitmasks[] = {
 
 /*** Helper Function Prototypes ***********************************************/
 
-void Feistel_permute(unsigned long bits, unsigned long *target_space);
+void feistel_permute(unsigned long bits, unsigned long *target_space);
 
 /*** Functions ****************************************************************/
+/**
+ * The feistel function, taking R as 32 bit right side of previous iteration, 
+ * expanding it and applying the XOR bitwise operation to it and the relevant 
+ * subkey, applying the S-boxes to the result and finally applying the
+ * permutation function relevant to Feiste.  The 32 bit value is returned.  
+ */
 unsigned long feistel(unsigned long *R, unsigned long *subkey)
 {
 	unsigned long expanded[2] = {0, 0};
 	unsigned long ret_val = 0;
-#ifdef DEBUGFLAG
-	printf("Feistel\n");
+#ifdef VERBOSE
+	printf("\n\x1b[1;35mfeistel\x1b[0m\n");
 	printf("\nRight side bits:\n");
 	printf("before expanding:\t");
 	print_original_bits(R, NULL);
 	printf("\n");
 #endif
+
+	/* expand to 48 bits */
 	expand(R, (unsigned long *)expanded);	
 	
-#ifdef DEBUGFLAG
+#ifdef VERBOSE
 	printf("after expanding:\t");
 	print_expanded_bits((unsigned long *)expanded, NULL);	
 	printf("\n");
@@ -81,33 +101,36 @@ unsigned long feistel(unsigned long *R, unsigned long *subkey)
 	printf("\n");
 #endif
 
+	/* XOR With Subkey */
 	expanded[0] ^= subkey[0];
 	expanded[1] ^= subkey[1];
 
-#ifdef DEBUGFLAG
+#ifdef VERBOSE
 	printf("after XOR:\t\t");
 	print_expanded_bits((unsigned long *)expanded, NULL);	
 	printf("\n");
 #endif
 
+	/* Apply subsitution boxes */
 	substitute((unsigned long *)expanded, &ret_val); 
 
-#ifdef DEBUGFLAG
+#ifdef VERBOSE
 	printf("after substitution:\t");
 	print_original_bits(&ret_val, NULL);
 	printf("\n");
 #endif
 
-	Feistel_permute(ret_val, &ret_val);	
+	/* Feistel permutation */
+	feistel_permute(ret_val, &ret_val);	
 
-#ifdef DEBUGFLAG
+#ifdef VERBOSE
 	printf("after permutation:\t");
 	print_original_bits(&ret_val, NULL);
 	printf("\n");
 #endif
 
-#ifdef DEBUGFLAG
-	printf("\n\\Feistel\n");
+#ifdef VERBOSE
+	printf("\n\x1b[1;35m\\feistel\x1b[0m\n\n");
 #endif
 
 	/* some code */
@@ -115,7 +138,10 @@ unsigned long feistel(unsigned long *R, unsigned long *subkey)
 }
 /*** Helper Functions *********************************************************/
 
-void Feistel_permute(unsigned long bits, unsigned long *target_space)
+/**
+ * The feistel permutation
+ */
+void feistel_permute(unsigned long bits, unsigned long *target_space)
 {
 	int i;
 	int bit_no;

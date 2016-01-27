@@ -10,7 +10,7 @@ RM = rm -f
 #COMPILER_FLAGS specifies the additional compilation options we're using
 # -w suppresses all warnings
 COMPILER_FLAGS 	= -Wall -ansi -pedantic
-DFLAGS			= -DDEBUGFLAG
+DFLAGS			= -DDEBUGFLAG -DVERBOSE
 
 #LINKER_FLAGS specifies the libraries we're linking against
 

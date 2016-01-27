@@ -47,8 +47,20 @@
 
 /*** Function Prototypes ******************************************************/
 
+/**
+ * The final permutation in the encoding process.
+ */
 void final_permutation(unsigned long *data_bits, unsigned long *permuted_bits);
+
+/**
+ * The initial permutation in the encoding process.
+ */
 void initial_permutation(unsigned long *data_bits, unsigned long *permuted_bits);
+
+/**
+ * Print the 64 bits in data, and put the resultant characters in the
+ * memory space pointed to by string.  String may be a null pointer.
+ */
 void print_bits_permutation(unsigned long *data, char *string);
 
 #endif
