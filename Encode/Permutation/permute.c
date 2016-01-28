@@ -101,7 +101,7 @@ void set_bit(unsigned long *data_bits, int check_bit,
  */
 void final_permutation(unsigned long *data_bits, unsigned long *permuted_bits)
 {
-	int i, j;
+	int i;
 	int bit_no;
 	
 	permuted_bits[0] = 0;
@@ -120,7 +120,7 @@ void final_permutation(unsigned long *data_bits, unsigned long *permuted_bits)
  */
 void initial_permutation(unsigned long *data_bits, unsigned long *permuted_bits)
 {
-	int i, j;
+	int i;
 	int bit_no;
 	
 	permuted_bits[0] = 0;
