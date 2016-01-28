@@ -33,6 +33,7 @@ testexpand
 testsubstitution
 testkeys
 testpermute
+testencode
 
 *.py~
 *.c~
