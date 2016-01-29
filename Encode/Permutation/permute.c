@@ -10,6 +10,9 @@
 
 /*** Static Global Variables **************************************************/
 
+/*
+ * Bitmasks to address indibitual bits using bitwise operations. 
+ */
 static unsigned long bitmasks[] = {
 	0,
 	BIT1,

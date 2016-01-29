@@ -38,7 +38,17 @@
 
 
 /*** Function Headers *********************************************************/
+
+/**
+ * Encrypt 64 bits of data using the sixteen subkeys provided, putting the
+ * encrypted data into encoded.
+ */
 void encode(unsigned long **keys, unsigned long *data, unsigned long *encoded);
+
+/**
+ * Decrypt 64 bits of data using the sixteen subkeys provided, putting the
+ * decrypted data into decoded.
+ */
 void decode(unsigned long **subkeys, unsigned long *data, unsigned long *decoded);
 
 #endif

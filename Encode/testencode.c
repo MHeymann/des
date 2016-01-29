@@ -4,7 +4,7 @@
 
 int main(int argc, char *argv[]) 
 {
-
+	/* some valid keys for testing */
 	unsigned long K1[] =    	{453177088, 4235227648};
 	unsigned long K2[] =    	{2041501952, 3687441664};
 	unsigned long K3[] =    	{1442613760, 1120901376};
@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 	unsigned long word[] = {19088743, 2309737967};
 	unsigned long target[2] = {0,0};
 	unsigned long target2[2] = {0,0};
+	int fail = 0;
 
 	subkeys[0] = K1;
 	subkeys[1] = K2;
@@ -49,6 +50,18 @@ int main(int argc, char *argv[])
 	printf("\nencoded:\t%lu %lu", target[0], target[1]);
 	printf("\nword:\t\t%lu %lu\ndecoded:\t%lu %lu\n", word[0], word[1], target2[0], target2[1]);
 
+	if (word[0] != target2[0]) {
+		printf("\x1b[1;31mFAILED!\nLeft bits of original word and decoded word don't match!\x1b[0m\n");
+		fail = 1;
+	}
+	if (word[1] != target2[1]) {
+		printf("\x1b[1;31mFAILED!\nRight bits of original word and decoded word don't match!\x1b[0m\n");
+		fail = 1;
+	}
+	
+	if (!fail) {
+		printf("\x1b[1;34mPASSED!\x1b[0m\n");
+	}
 
 	return 0;
 }
